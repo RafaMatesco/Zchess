@@ -1,87 +1,45 @@
-# Welcome to React Router!
+# ZChess ♟️
 
-A modern, production-ready template for building full-stack React applications using React Router.
+Opa! Esse é o ZChess, um jogo de xadrez simples pra navegador.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+A ideia é ser super minimalista, focado facilitar o processo de jogar xadrez digital. Acredito que o local principal de uso vai ser dentro de laboratórios de algumas faculdades por aí kkkk.
 
-## Features
+Você entra no site, cria um código pra partida, manda o link e pronto.
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+###  Como jogar
+* **Jogue por código**: É só criar uma sala, pegar o código e mandar pro seu amigo.
+* **Entrada Fácil**: Seu amigo pode só colar o código na home e tá no jogo!
 
-## Getting Started
+### 💻 Como eu fiz isso?
 
-### Installation
+Pra fazer isso aqui, eu tô usando essas ferramentas:
 
-Install the dependencies:
+* [**React.js**](https://react.dev/): Pra fazer a interface funcionar direitinho.
+* [**Vite**](https://vitejs.dev/): Pra fazer tudo rodar rapidinho aqui no desenvolvimento.
+* [**Tailwind CSS**](https://tailwindcss.com/): Pra deixar o site bonito sem sofrer com CSS.
 
-```bash
-npm install
-```
 
-### Development
+### 🚀 Quer rodar aí?
 
-Start the development server with HMR:
+Quer rodar aí na sua máquina? Siga esses passos:
 
-```bash
-npm run dev
-```
+1.  **Baixa o projeto**
+    ```bash
+    git clone [URL-REPO]
+    cd Zchess
+    ```
 
-Your application will be available at `http://localhost:5173`.
+2.  **Instala os pacotes necessários**
+    ```bash
+    npm install
+    ```
 
-## Building for Production
+3.  **Roda o projeto**
+    ```bash
+    npm run dev
+    ```
 
-Create a production build:
+4.  Agora é só abrir `http://localhost:5173` (ou a porta que aparecer aí) no seu navegador.
 
-```bash
-npm run build
-```
-
-## Deployment
-
-### Docker Deployment
-
-To build and run using Docker:
-
-```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+### Desenvolvimento
+Ainda é um WIP (work in progress), então não está funcionando completamente.
