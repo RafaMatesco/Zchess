@@ -33,13 +33,13 @@ const createInitialBoard = (): BoardCell[][] => {
         square.pieceIsLight = false;
       } else if (r === 1) {
         square.pieceType = "peao";
-        square.pieceIsLight = false; 
+        square.pieceIsLight = false;
       } else if (r === 6) {
         square.pieceType = "peao";
-        square.pieceIsLight = true; 
+        square.pieceIsLight = true;
       } else if (r === 7) {
         square.pieceType = pieceTypes[c];
-        square.pieceIsLight = true; 
+        square.pieceIsLight = true;
       }
 
       row.push(square);
@@ -57,7 +57,22 @@ export function Chess() {
     return `${type}${colorSuffix}.png`;
   };
 
-  const handleMovePiece = (fromRow: number, fromCol: number, toRow: number, toCol: number) => {
+  const handleClick = (cell: BoardCell) => {
+    if (!cell.pieceType) {
+      if (cell.isPossibleMove) {
+        console.log(cell);
+        //movePiece()
+      }
+      setBoard((currentBoard) => {
+        const newBoard = currentBoard.map((row) => row.map((cell) => ({ ...cell })));
+        return newBoard;
+      });
+    } else {
+      showPossibleMoves(cell);
+    }
+  };
+
+  const movePiece = (fromRow: number, fromCol: number, toRow: number, toCol: number) => {
     setBoard((currentBoard) => {
       const newBoard = currentBoard.map((row) => row.map((cell) => ({ ...cell })));
 
@@ -73,12 +88,48 @@ export function Chess() {
   };
 
   const showPossibleMoves = (cell: BoardCell) => {
-    console.log("Célula clicada:", cell);
-    if (cell.pieceType === "peao") {
-      if(cell.pieceIsLight == false){
-        
-      }
+    if (!cell.pieceType) {
+      setBoard((currentBoard) => {
+        const newBoard = currentBoard.map((row) => row.map((cell) => ({ ...cell })));
+        return newBoard;
+      });
     }
+
+    setBoard((currentBoard) => {
+      const newBoard = currentBoard.map((row) => row.map((cell) => ({ ...cell, isPossibleMove: false })));
+      const { row, col, pieceType, pieceIsLight } = cell;
+
+      //Lógica do PEAO
+      if (pieceType === "peao") {
+        const direction = pieceIsLight ? -1 : 1;
+        const targetRow = row + direction;
+
+        const startRow = pieceIsLight ? 6 : 1;
+        if (row === startRow) {
+          const doubleJumpRow = row + direction * 2;
+          if (newBoard[targetRow][col].pieceType === null && newBoard[doubleJumpRow][col].pieceType === null) {
+            newBoard[doubleJumpRow][col].isPossibleMove = true;
+          }
+        } else if (targetRow >= 0 && targetRow < 8) {
+          const targetCell = newBoard[targetRow][col];
+          if (targetCell.pieceType === null) {
+            targetCell.isPossibleMove = true;
+          }
+        }
+      } else if (pieceType == "torre") {
+        const direction = pieceIsLight ? -1 : 1;
+        //for para x
+        for (let x = 0; x < 8; x++) {
+          const targetCell = newBoard[x][col];
+        }
+        //for para y
+        for (let y = 0; y < 8; y++) {
+          const targetCell = newBoard[row][y];
+        }
+      }
+
+      return newBoard;
+    });
   };
 
   return (
@@ -86,12 +137,16 @@ export function Chess() {
       {board.map((row, r) => (
         <React.Fragment key={r}>
           {row.map((cell) => {
-            const bgColor = cell.isLight ? "bg-board-light" : "bg-board-dark";
+            let bgColor = cell.isLight ? "bg-board-light" : "bg-board-dark";
             const imageSrc = getPieceImageSrc(cell.pieceType, cell.pieceIsLight);
+            bgColor = cell.isPossibleMove ? "bg-board-highlight" : bgColor;
 
             return (
-              <div key={`${cell.row}-${cell.col}`} className={`${bgColor} aspect-square flex items-center justify-center cursor-pointer`} onClick={() => showPossibleMoves(cell)}>
-                {}
+              <div
+                key={`${cell.row}-${cell.col}`}
+                className={`${bgColor} aspect-square flex items-center justify-center cursor-pointer transition-colors duration-300`}
+                onClick={() => handleClick(cell)}
+              >
                 {cell.pieceType && imageSrc && (
                   <img
                     src={imageSrc}
