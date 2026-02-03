@@ -57,21 +57,6 @@ export function Chess() {
     return `${type}${colorSuffix}.png`;
   };
 
-  const handleClick = (cell: BoardCell) => {
-    if (!cell.pieceType) {
-      if (cell.isPossibleMove) {
-        console.log(cell);
-        //movePiece()
-      }
-      setBoard((currentBoard) => {
-        const newBoard = currentBoard.map((row) => row.map((cell) => ({ ...cell })));
-        return newBoard;
-      });
-    } else {
-      showPossibleMoves(cell);
-    }
-  };
-
   const movePiece = (fromRow: number, fromCol: number, toRow: number, toCol: number) => {
     setBoard((currentBoard) => {
       const newBoard = currentBoard.map((row) => row.map((cell) => ({ ...cell })));
@@ -88,43 +73,114 @@ export function Chess() {
   };
 
   const showPossibleMoves = (cell: BoardCell) => {
+    //console.log(cell);
+
     if (!cell.pieceType) {
-      setBoard((currentBoard) => {
-        const newBoard = currentBoard.map((row) => row.map((cell) => ({ ...cell })));
-        return newBoard;
-      });
+      setBoard((currentBoard) => currentBoard.map((row) => row.map((c) => ({ ...c, isPossibleMove: false }))));
+      return;
     }
 
     setBoard((currentBoard) => {
-      const newBoard = currentBoard.map((row) => row.map((cell) => ({ ...cell, isPossibleMove: false })));
+      const newBoard = currentBoard.map((row) => row.map((c) => ({ ...c, isPossibleMove: false })));
       const { row, col, pieceType, pieceIsLight } = cell;
 
-      //Lógica do PEAO
+      // Função auxiliar para validar se uma posição está dentro do tabuleiro e se pode ser ocupada
+      const isValidMove = (row: number, column: number) => {
+        if (row < 0 || row >= 8 || column < 0 || column >= 8) return { valid: false, stop: true };
+        const target = newBoard[row][column];
+        if (target.pieceType === null) return { valid: true, stop: false };
+        if (target.pieceIsLight !== pieceIsLight) return { valid: true, stop: true }; // Captura peça inimiga
+        return { valid: false, stop: true }; // Peça aliada bloqueia
+      };
+
+      // --- Lógica do PEÃO ---
       if (pieceType === "peao") {
         const direction = pieceIsLight ? -1 : 1;
-        const targetRow = row + direction;
-
         const startRow = pieceIsLight ? 6 : 1;
-        if (row === startRow) {
-          const doubleJumpRow = row + direction * 2;
-          if (newBoard[targetRow][col].pieceType === null && newBoard[doubleJumpRow][col].pieceType === null) {
-            newBoard[doubleJumpRow][col].isPossibleMove = true;
-          }
-        } else if (targetRow >= 0 && targetRow < 8) {
-          const targetCell = newBoard[targetRow][col];
-          if (targetCell.pieceType === null) {
-            targetCell.isPossibleMove = true;
+        
+        // Verifica se não tem peça e mostra onde pode jogar
+        if (newBoard[row + direction]?.[col].pieceType === null) {
+          if (row === startRow && newBoard[row + direction * 2]?.[col].pieceType === null) {
+            newBoard[row + direction * 2][col].isPossibleMove = true;
+          } else {
+            newBoard[row + direction][col].isPossibleMove = true;
           }
         }
-      } else if (pieceType == "torre") {
-        const direction = pieceIsLight ? -1 : 1;
-        //for para x
-        for (let x = 0; x < 8; x++) {
-          const targetCell = newBoard[x][col];
-        }
-        //for para y
-        for (let y = 0; y < 8; y++) {
-          const targetCell = newBoard[row][y];
+
+        // Capturas diagonais
+        [-1, 1].forEach((side) => {
+          const target = newBoard[row + direction][col + side];
+
+          if (target && target.pieceType !== null && target.pieceIsLight !== pieceIsLight) {
+            target.isPossibleMove = true;
+          }
+        });
+      }
+
+      // --- Lógica do CAVALO ---
+      if (pieceType === "cavalo") {
+        const knightMoves = [
+          [row - 2, col - 1],
+          [row - 2, col + 1],
+          [row - 1, col - 2],
+          [row - 1, col + 2],
+          [row + 1, col - 2],
+          [row + 1, col + 2],
+          [row + 2, col - 1],
+          [row + 2, col + 1],
+        ];
+        knightMoves.forEach(([r, c]) => {
+          const check = isValidMove(r, c);
+          if (check.valid) newBoard[r][c].isPossibleMove = true;
+        });
+      }
+
+      // --- Lógica de PEÇAS DESLIZANTES (Torre, Bispo, Rainha) ---
+      const directions: { [key: string]: number[][] } = {
+        torre: [
+          [0, 1],
+          [0, -1],
+          [1, 0],
+          [-1, 0],
+        ],
+        bispo: [
+          [1, 1],
+          [1, -1],
+          [-1, 1],
+          [-1, -1],
+        ],
+        rainha: [
+          [0, 1],
+          [0, -1],
+          [1, 0],
+          [-1, 0],
+          [1, 1],
+          [1, -1],
+          [-1, 1],
+          [-1, -1],
+        ],
+      };
+
+      if (pieceType === "torre" || pieceType === "bispo" || pieceType === "rainha") {
+        directions[pieceType].forEach(([dr, dc]) => {
+          for (let i = 1; i < 8; i++) {
+            const r = row + dr * i;
+            const c = col + dc * i;
+            const check = isValidMove(r, c);
+            if (check.valid) newBoard[r][c].isPossibleMove = true;
+            if (check.stop) break; // Para se bater em algo ou capturar
+          }
+        });
+      }
+
+      // --- Lógica do REI ---
+      if (pieceType === "rei") {
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            if (dr === 0 && dc === 0) continue;
+            const check = isValidMove(row + dr, col + dc);
+            if (check.valid) newBoard[row + dr][col + dc].isPossibleMove = true;
+          }
         }
       }
 
@@ -145,7 +201,7 @@ export function Chess() {
               <div
                 key={`${cell.row}-${cell.col}`}
                 className={`${bgColor} aspect-square flex items-center justify-center cursor-pointer transition-colors duration-300`}
-                onClick={() => handleClick(cell)}
+                onClick={() => showPossibleMoves(cell)}
               >
                 {cell.pieceType && imageSrc && (
                   <img
