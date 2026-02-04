@@ -49,12 +49,29 @@ const createInitialBoard = (): BoardCell[][] => {
   return board;
 };
 
-export function Chess() {
+type ChessboardProps = { corUser: boolean };
+
+export function Chessboard({ corUser }: ChessboardProps) {
   const [board, setBoard] = useState(createInitialBoard());
+  const [selectedCell, setSelectedCell] = useState<BoardCell | null>(null);
   const getPieceImageSrc = (type: PieceType, isLight: boolean) => {
     if (!type) return null;
     const colorSuffix = isLight ? "Branco" : "Preto";
     return `${type}${colorSuffix}.png`;
+  };
+
+  const handlePieceClick = (cell: BoardCell) => {
+    if (cell.isPossibleMove && selectedCell) {
+      movePiece(selectedCell.row, selectedCell.col, cell.row, cell.col);
+      setSelectedCell(null);
+      // Limpa os movimentos possíveis
+      setBoard((currentBoard) => currentBoard.map((row) => row.map((c) => ({ ...c, isPossibleMove: false }))));
+      return;
+    }
+
+    // Caso contrário, mostra os movimentos possíveis
+    setSelectedCell(cell);
+    showPossibleMoves(cell);
   };
 
   const movePiece = (fromRow: number, fromCol: number, toRow: number, toCol: number) => {
@@ -80,10 +97,14 @@ export function Chess() {
       return;
     }
 
+    if (corUser !== cell.pieceIsLight) {
+      setBoard((currentBoard) => currentBoard.map((row) => row.map((c) => ({ ...c, isPossibleMove: false }))));
+      return;
+    }
+
     setBoard((currentBoard) => {
       const newBoard = currentBoard.map((row) => row.map((c) => ({ ...c, isPossibleMove: false })));
       const { row, col, pieceType, pieceIsLight } = cell;
-
       // Função auxiliar para validar se uma posição está dentro do tabuleiro e se pode ser ocupada
       const isValidMove = (row: number, column: number) => {
         if (row < 0 || row >= 8 || column < 0 || column >= 8) return { valid: false, stop: true };
@@ -97,13 +118,12 @@ export function Chess() {
       if (pieceType === "peao") {
         const direction = pieceIsLight ? -1 : 1;
         const startRow = pieceIsLight ? 6 : 1;
-        
+
         // Verifica se não tem peça e mostra onde pode jogar
         if (newBoard[row + direction]?.[col].pieceType === null) {
+          newBoard[row + direction][col].isPossibleMove = true;
           if (row === startRow && newBoard[row + direction * 2]?.[col].pieceType === null) {
             newBoard[row + direction * 2][col].isPossibleMove = true;
-          } else {
-            newBoard[row + direction][col].isPossibleMove = true;
           }
         }
 
@@ -201,13 +221,13 @@ export function Chess() {
               <div
                 key={`${cell.row}-${cell.col}`}
                 className={`${bgColor} aspect-square flex items-center justify-center cursor-pointer transition-colors duration-300`}
-                onClick={() => showPossibleMoves(cell)}
+                onClick={() => handlePieceClick(cell)}
               >
                 {cell.pieceType && imageSrc && (
                   <img
                     src={imageSrc}
                     alt={cell.pieceType}
-                    className="w-3/4 h-3/4 select-none object-contain" // Ajuste de estilo para a peça
+                    className="w-3/4 h-3/4 select-none object-contain pointer-events-none" // Ajuste de estilo para a peça
                   />
                 )}
               </div>
